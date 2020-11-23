@@ -1,0 +1,164 @@
+@startuml
+
+FlooringMasteryApp --> FlooringMasteryController
+FlooringMasteryController --> FlooringMasteryService
+FlooringMasteryController --> FlooringMasteryView
+FlooringMasteryView --> UserIO
+FlooringMasteryServiceImpl --> BackupFileDao
+FlooringMasteryServiceImpl --> StateFileDao
+FlooringMasteryServiceImpl --> ProductFileDao
+FlooringMasteryServiceImpl --> OrderFilesDao
+
+class FlooringMasteryApp{
+main()
+}
+
+class FlooringMasteryController{
+FlooringMasteryService flooringMasteryService
+FlooringMasteryView flooringMasteryView
+run()
+}
+
+interface FlooringMasteryService {
+createOrder(Order order)
+updateOrder(Order order)
+deleteOrder(Order order)
+List<Order> listOrders(LocalDate date)
+exportData()
+}
+
+class FlooringMasteryServiceImpl implements FlooringMasteryService{
+OrderFilesDao orderFilesDao
+ProductFileDao productFileDao
+StateFileDao stateFileDao
+FlooringMasteryServiceImpl(OrderFilesDao,ProductFileDao,StateFileDao)
+createOrder(Order order)
+updateOrder(Order order)
+deleteOrder(Order order)
+List<Order> listOrders(LocalDate date)
+exportData()
+}
+
+
+class FlooringMasteryView{
+UserIO userIO
+Scanner scanner
+FlooringMasteryView()
+Order createOrder()
+Order editOrder(Order order)
+LocalDate orderLookup()
+Order editSelector(List<Order> orders)
+Order deleteSelector(List<Order> orders)
+int mainMenu()
+exportMessage()
+}
+
+interface OrderFilesDao {
+List<Order> listOrders(LocalDate date)
+addOrder(LocalDate date, Order order)
+updateOrder(LocalDate date, Order order)
+removeOrder(LocalDate date, Order order)
+}
+
+class OrderFilesDaoImpl implements OrderFilesDao{
+String FOLDER_NAME;
+OrderFileDaoImpl(String FOLDER_NAME)
+List<Order> listOrders(LocalDate date)
+addOrder(Order order)
+updateOrder(Order order)
+removeOrder(Order order)
+}
+
+class Order{
+LocalDate date
+Integer OrderNumber
+String CustomerName
+State state
+String ProductType
+BigDecimal Area
+BigDecimal CostPerSquareFoot
+BigDecimal MaterialCost
+BigDecimal LaborCost
+BigDecimal Tax
+BigDecimal Total
+}
+
+interface BackupFileDao {
+writeOrders(List<Order> orders)
+}
+
+class BackupFileDaoImpl implements BackupFileDao{
+String FILE_NAME;
+List<Order> orderList;
+ProductFileDaoImpl(String FILE_NAME)
+writeOrders(List<Order> orders)
+}
+
+interface StateFileDao {
+State getState(String stateAbbreviation)
+}
+
+class StateFileDaoImpl implements StateFileDao{
+String FILE_NAME;
+HashMap<String,State> states
+StateFileDaoImpl(String FILE_NAME)
+State getState(String stateAbbreviation)
+}
+
+class State{
+String stateAbbreviation
+String stateName
+BigDecimal taxRate
+State(String abbr, String name, BigDecimal taxRate)
+getStateName()
+getStateAbbreviation()
+getTaxRate()
+}
+
+interface ProductFileDao {
+List<Product> getProductList()
+}
+
+class ProductFileDaoImpl implements ProductFileDao {
+String FILE_NAME;
+List<Product> productList;
+ProductFileDaoImpl(String FILE_NAME)
+List<Product> getProductList()
+}
+
+class Product{
+String ProductType
+BigDecimal CostPerSquareFoot
+BigDecimal LaborCostPerSquareFoot
+}
+
+
+interface UserIO{
+void print(String msg);
+double readDouble(String prompt);
+double readDouble(String prompt, double min, double max);
+float readFloat(String prompt);
+float readFloat(String prompt, float min, float max);
+int readInt(String prompt);
+int readInt(String prompt, int min, int max);
+long readLong(String prompt);
+long readLong(String prompt, long min, long max);
+String readString(String prompt);
+}
+
+class UserIOimpl implements UserIO{
+UserIOimpl()
+void print(String msg);
+double readDouble(String prompt);
+double readDouble(String prompt, double min, double max);
+float readFloat(String prompt);
+float readFloat(String prompt, float min, float max);
+int readInt(String prompt);
+int readInt(String prompt, int min, int max);
+long readLong(String prompt);
+long readLong(String prompt, long min, long max);
+String readString(String prompt);
+}
+
+
+@enduml

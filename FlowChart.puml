@@ -1,0 +1,125 @@
+@startuml
+start
+:Load state dataset
+:Load productList dataset
+:Set KeepRunning to true;
+repeat :Print Main Menu;
+!pragma useVerticalIf on
+if (Menu Option = 1?) then (yes)
+  partition  DisplayOrders {
+    :InputCollector(Order Date, non-empty));
+    if (Orders exist for provided date?) then (yes)
+    :Load all orders from that day's order file.;
+    :Display all orders for that date.;
+    else (no)
+    :Print error - no orders!;
+    endif
+  }
+elseif (Menu Option = 2?) then (yes)
+   partition  CreateOrder {
+    :Create an order object, using the following inputs;
+    :InputCollector(Order Date,(Must be in the future)));
+    :InputCollector(Customer Name,(Limited character set, non-empty));
+    :InputCollector(State, (Limit to known states));
+    :InputCollector(Product Type, Select from provided list);
+    :InputCollector(Area, Positive decimal >= 100);
+    :Pull tax info from records;
+    :Finish creating Order object;
+    :Print order object details;
+    :InputCollector(Confirm entered data y/n);
+    if (User has confirmed entry) then (yes)
+    if (File does not exist) then (yes)
+    :Create a new order file;
+    endif
+    :Add Order to OrderFile;
+    :Print an order number, based on file data;
+    endif
+  }
+elseif (Menu Option 3?) then (yes)
+  partition  EditOrder {
+    :InputCollector(Order Date, non-empty));
+    if (Orders exist for provided date?) then (yes)
+      :InputCollector(OrderNumber,Non-empty Integer);
+      if(Order exists) then (yes)
+        :Print order information;
+        :Copy order information to a new (draft) order object.
+        :InputCollector(Customer Name,(Limited character set, May be empty));
+        if(If Customer Name provided is not empty)
+        :Replace draft order Customer Name with Customer Name provided;
+        endif
+        :InputCollector(State, (Limit to known states));
+        if(If State provided is not empty)
+        :Replace draft order State with State provided;
+        endif
+        :InputCollector(Product Type, Select from provided list);
+        if(If Product Type provided is not empty)
+        :Replace draft order Product Type with Product Type provided;
+        endif
+        :InputCollector(Area, Positive decimal >= 100);
+        if(If Area provided is not empty)
+        :Replace draft order Area with Area provided;
+        endif
+        :Pull tax info from records
+        :Print order object details;
+        :InputCollector(Confirm data modification y/n);
+        if (User has confirmed modification) then (Yes)
+        :Update order in file to match draft object;
+        endif
+        else (no)
+      endif
+    endif
+  }
+elseif (Menu Option 4?) then (yes)
+  partition  RemoveOrder {
+    :InputCollector(Order Date, non-empty));
+    if (Orders exist for provided date?) then (yes)
+      :Load all orders from that day's order file.;
+      :InputCollector(OrderNumber,Non-empty Integer);
+      if(Order exists) then (yes)
+        :Print order information;
+        :InputCollector(Confirm data deletion y/n);
+        if (User has confirmed deletion) then (Yes)
+        :Delete order from relevant file location;
+        endif
+      else (no)
+      endif
+    else (no)
+      :Print error - no orders!;
+    endif
+  }
+elseif (Menu Option 5?) then (yes)
+  partition  ExportData {
+    :Create list of orders;
+    :Loop through all files in a order directory;
+    repeat :Iterate through order files;
+      :Add all orders in current file to list;
+    repeat while (Files remain)
+    :Save the full list of orders to the backup data file.;
+  }
+elseif (Menu Option 6?) then (yes)
+  :Set KeepRunning to false;;
+else (no)
+endif
+repeat while (KeepRunnning is true?)
+stop
+
+repeat :InputCollector;
+note left
+InputCollector takes additional validation methods as arguments
+these are then applied in the validation condition;
+end note
+!pragma useVerticalIf on
+if (Input is valid and non-empty) then (yes)
+  if (Numerical bounds provided) then (yes)
+     if(Input within numerical bounds)
+       :Input is valid, set awaitInput to false;
+     endif
+  else
+    :Input is valid, set awaitInput to false;
+  stop
+  endif
+endif
+repeat while (Await input?)
+:Return input;
+
+@enduml
